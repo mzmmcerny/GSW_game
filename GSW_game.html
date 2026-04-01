@@ -60,7 +60,7 @@ body { font-family: Arial; margin: 0; }
 <h2>Úvod/Introduction</h2>
 Email: <input type="email" id="email" placeholder="Zadejte email/Enter your email address" required><br><br>
 
-Zkušenost s ptáky / Experience with birds:
+Zkušenost s ptáky /Experience with birds:
 <select id="experience" required>
     <option value="" disabled selected>-- vyberte / select --</option>
     <option value="NE">bez zkušeností / no experience</option>
@@ -80,22 +80,24 @@ Zkušenost s ptáky / Experience with birds:
 <h3 id="questionNumber"></h3>
 <img id="targetImg">
 <br><br>
-<button onclick="nextQuestion()">Další</button>
+<button onclick="nextQuestion()">Další/Next</button>
 </div>
 
 <div id="rightPanel">
 <div id="grid"></div>
 </div>
 
+</div>
+
 <div id="endScreen" style="display:none; text-align:center; padding:40px;">
-    <h2>Děkujeme za vyplnění! 🙏</h2>
+    <h2>Děkujeme za vyplnění!/Thank you for participating!</h2>
     <p>
-        Vaše odpovědi byly úspěšně zaznamenány.<br>
-        Thank you for participating!
+        Vaše odpovědi byly úspěšně zaznamenány. Jakmile budou vyhodnoceny, zašleme Vám výsledky na e-mailovou adresu, kterou jste uvedli.<br>
+        Your answers have been successfully recorded. Once they have been evaluated, we will send you your results to the email address you provided.<br>
+        
     </p>
 </div>
 
-</div>
 <script>
 
 /* ==============================
@@ -298,11 +300,17 @@ function nextQuestion() {
 
     currentQuestion++;
 
-    if (currentQuestion < questions.length) {
-        loadQuestion();
-    } else {
-        alert("Děkujeme za vyplnění! O vašich výsledcích Vás budeme po vyhodnocení informovat na zadaný email./Thank you for completing the form! We will notify you of your results via the email address you provided once they have been evaluated.");
-    }
+    if (currentQuestion >= questions.length) {
+
+    // schovej experiment
+    document.getElementById("container").style.display = "none";
+
+    // zobraz konec
+    document.getElementById("endScreen").style.display = "block";
+
+    return;
+}
+    loadQuestion();
 }
 
 </script>
