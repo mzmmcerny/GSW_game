@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>GSW_experiment_game</title>
+
+<style>
+body { font-family: Arial; margin: 0; }
+
+#container { display: flex; }
+
+#leftPanel {
+    position: sticky;
+    top: 0;
+    width: 300px;
+    padding: 20px;
+    background: #f0f0f0;
+    height: 100vh;
+}
+
+#leftPanel img {
+    width: 250px;
+    border: 3px solid black;
+}
+
+#rightPanel {
+    flex: 1;
+    height: 100vh;
+    overflow-y: scroll;
+    padding: 20px;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+/* 🧩 BOX KOLEM OBRÁZKU */
+.imgBox {
+    position: relative;
+}
+
+/* 🖼️ obrázky */
+.imgBox img {
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+/* 🔍 hover zoom */
+.imgBox:hover {
+    outline: 3px solid #999;
+}
+
+/* ❌ odebraný obrázek */
+.removed {
+    opacity: 0.2;
+    border: 2px solid red;
+}
+
+/* ✔ finální výběr */
+.selectedFinal {
+    border: 4px solid limegreen;
+}
+
+/* ✔ FAJFKA */
+.selectBtn {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* ❌ KŘÍŽEK */
+.removeBtn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#startScreen { padding: 30px; }
+</style>
+</head>
+
+<body>
+
+<div id="startScreen">
+<h2>Úvod/Introduction</h2>
+Email: <input type="email" id="email" placeholder="Zadejte email/Enter your email address" required><br><br>
+
+Zkušenost s ptáky /Experience with birds:
+<select id="experience" required>
+    <option value="" disabled selected>-- vyberte / select --</option>
+    <option value="NE">bez zkušeností / no experience</option>
+    <option value="AO">amatérský pozorovatel / amateur observer</option>
+    <option value="BW">pozorovatel ptáků / birdwatcher</option>
+    <option value="PO">profesionální ornitolog / professional ornithologist</option>
+</select>
+
+<br><br>
+
+<button onclick="startExperiment()">Start</button>
+</div>
+
+<div id="container" style="display:none;">
+
+<div id="leftPanel">
+<h3 id="questionNumber"></h3>
+<img id="targetImg">
+<br><br>
+<button onclick="nextQuestion()">Další/Next</button>
+</div>
+
+<div id="rightPanel">
+<div id="grid"></div>
+</div>
+
+</div>
+
+<div id="endScreen" style="display:none; text-align:center; padding:40px;">
+    <h2>Děkujeme za vyplnění!/Thank you for participating!</h2>
+    <p>
+        Vaše odpovědi byly úspěšně zaznamenány. Jakmile budou vyhodnoceny, zašleme Vám výsledky na e-mailovou adresu, kterou jste uvedli.<br>
+        Your answers have been successfully recorded. Once they have been evaluated, we will send you your results to the email address you provided.<br>
+        
+    </p>
+</div>
+
+<script>
+
+/* ==============================
+   ⚙️ CONFIG
+============================== */
+
+// 👉 SEM VLOŽ URL z Apps Scriptu
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7SRU4kDMw01EQKX1xYJnt_Rr7d6Aa6iVnYCZyP7jWwl0w92H3ef1B_zHf5JabHMmR/exec";
+
+/* ==============================
+   🧠 QUESTIONS
+============================== */
+let questions = [
+    {
+        id: "Q1",
+        target: "targets/cav_10_M_L_220516_04_Resized_a1.png",
+        options: [
+            // ----- SET 1 -----
+            "M/cav_01_M_R_vzor.png",
+            "M/cav_02_M_L_vzor.png",
+            "M/cav_03_M_L_vzor.png",
+            "M/cav_04_M_L_vzor.png",
+            "M/cav_05_M_R_vzor.png",
+            "M/cav_06_M_L_vzor.png",
+            "M/cav_07_M_R_vzor.png",
+            "M/cav_08_M_R_vzor.png",
+            "M/cav_09_M_L_vzor.png",
+            "M/cav_10_M_L_vzor.png",
+            "M/cav_11_M_R_vzor.png",
+            "M/cav_12_M_R_vzor.png",
+            "M/cav_15_M_R_vzor.png",
+            "M/cav_17_M_L_vzor.png",
+            "M/cav_18_M_L_vzor.png",
+            "M/cav_19_M_L_vzor.png",
+            "M/cav_20_M_L_vzor.png",
+            "M/cav_21_M_R_vzor.png",
+            "M/cav_22_M_L_vzor.png",
+            "M/cav_23_M_L_vzor.png",
+            "M/cav_24_M_R_vzor.png",
+            "M/cav_25_M_L_vzor.png" 
+        ]
+    },
+
+    {
+        id: "Q2",
+        target: "targets/cav_01_F_R_190524_06_Resized_a1.png",
+        options: [
+           // ----- SET 2 -----
+            "F/cav_01_F_R_vzor.png",
+            "F/cav_02_F_L_vzor.png",
+            "F/cav_03_F_L_vzor.png",
+            "F/cav_04_F_L_vzor.png",
+            "F/cav_05_F_R_vzor.png",
+            "F/cav_06_F_L_vzor.png",
+            "F/cav_07_F_R_vzor.png",
+            "F/cav_08_F_R_vzor.png",
+            "F/cav_09_F_L_vzor.png",
+            "F/cav_10_F_L_vzor.png",
+            "F/cav_11_F_R_vzor.png",
+            "F/cav_12_F_R_vzor.png",
+            "F/cav_13_F_L_vzor.png",
+            "F/cav_14_F_L_vzor.png",
+            "F/cav_16_F_L_vzor.png",
+            "F/cav_22_F_L_vzor.png",
+            "F/cav_23_F_L_vzor.png",
+            "F/cav_24_F_R_vzor.png",
+            "F/cav_25_F_L_vzor.png",
+            "F/cav_26_F_R_vzor.png"
+        ]
+    }
+
+    // další otázky...
+];
+/* ==============================
+   🔄 RANDOMIZACE OTÁZEK
+============================== */
+questions = questions.sort(() => Math.random() - 0.5);
+
+/* ==============================
+   🔢 RESPONDENT ID
+============================== */
+let respondentID = Date.now();
+
+/* ==============================
+   🔄 STATE
+============================== */
+let currentQuestion = 0;
+let removedSet = new Set();
+let selectedFinal = null;
+
+/* ==============================
+   ▶️ START
+============================== */
+function startExperiment() {
+    const email = document.getElementById("email").value.trim();
+    const experience = document.getElementById("experience").value;
+
+    // kontrola emailu
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+        alert("Prosím vyplňte email./Please enter your email address.");
+        return;
+    }
+
+    if (!emailPattern.test(email)) {
+        alert("Prosím zadejte platný email./Please enter a valid email address.");
+        return;
+    }
+
+    // kontrola zkušenosti
+    if (!experience) {
+        alert("Vyberte prosím zkušenost./Please select an experience.");
+        return;
+    }
+
+    // vše OK → spustit experiment
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("container").style.display = "flex";
+
+    loadQuestion();
+}
+
+/* ==============================
+   📥 LOAD QUESTION
+============================== */
+function loadQuestion() {
+
+    removedSet = new Set();
+    selectedFinal = null;
+    const q = questions[currentQuestion];
+
+    document.getElementById("questionNumber").innerText =
+        `Otázka ${currentQuestion + 1} (${q.id})`;
+
+    document.getElementById("targetImg").src = q.target;
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+   q.options.forEach(src => {
+
+        const box = document.createElement("div");
+        box.className = "imgBox";
+
+        const img = document.createElement("img");
+        img.src = src;
+
+        // ✔ tlačítko výběru
+        const selectBtn = document.createElement("div");
+        selectBtn.innerText = "✔";
+        selectBtn.className = "selectBtn";
+
+        selectBtn.onclick = () => {
+            if (removedSet.has(src)) return;
+
+            document.querySelectorAll(".imgBox").forEach(el => {
+                el.classList.remove("selectedFinal");
+            });
+
+            box.classList.add("selectedFinal");
+            selectedFinal = src;
+        };
+
+        // ❌ tlačítko odebrání
+        const removeBtn = document.createElement("div");
+        removeBtn.innerText = "✖";
+        removeBtn.className = "removeBtn";
+
+        removeBtn.onclick = () => {
+            if (removedSet.has(src)) {
+                removedSet.delete(src);
+                box.classList.remove("removed");
+            } else {
+                removedSet.add(src);
+                box.classList.add("removed");
+
+                // pokud byl odebraný finální → zruš výběr
+                if (selectedFinal === src) {
+                    selectedFinal = null;
+                    box.classList.remove("selectedFinal");
+                }
+            }
+        };
+
+        box.appendChild(img);
+        box.appendChild(selectBtn);
+        box.appendChild(removeBtn);
+
+        grid.appendChild(box);
+    });
+}
+
+
+/* ==============================
+   ❌ REMOVE
+============================== */
+function toggleRemove(div, src) {
+    if (removedSet.has(src)) {
+        removedSet.delete(src);
+        div.classList.remove("removed");
+    } else {
+        removedSet.add(src);
+        div.classList.add("removed");
+    }
+}
+
+/* ==============================
+   📤 SEND TO SHEETS
+============================== */
+function sendData(q, selected, remaining) {
+
+    const payload = {
+        respondent_id: respondentID,
+        email: document.getElementById("email").value,
+        experience: document.getElementById("experience").value,
+        question_id: q.id,
+        target: q.target,
+        selected: selected,
+        remaining: remaining.join(","),
+        removed: Array.from(removedSet)
+    };
+
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}
+
+/* ==============================
+   ➡️ NEXT
+============================== */
+function nextQuestion() {
+
+    const q = questions[currentQuestion];
+
+    if (!selectedFinal) {
+        alert("Vyberte finální obrázek (✔)!");
+        return;
+    }
+
+    const remaining = q.options.filter(o => !removedSet.has(o));
+
+    sendData(q, selectedFinal, remaining);
+
+    currentQuestion++;
+
+    if (currentQuestion >= questions.length) {
+        document.getElementById("container").style.display = "none";
+        document.getElementById("endScreen").style.display = "block";
+        return;
+    }
+
+    loadQuestion();
+}
+</script>
+
+</body>
+</html>
