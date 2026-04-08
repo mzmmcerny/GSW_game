@@ -5,7 +5,7 @@
 <title>GSW_experiment_game</title>
 
 <style>
-body { font-family: Arial; margin: 0; }
+body { font-family: Arial; margin: 0;  overflow-y: scroll;}
 
 #container { display: flex; }
 
@@ -15,7 +15,7 @@ body { font-family: Arial; margin: 0; }
     width: 300px;
     padding: 20px;
     background: #f0f0f0;
-    height: 100vh;
+    height: fit-content;
 }
 
 #leftPanel img {
@@ -25,8 +25,6 @@ body { font-family: Arial; margin: 0; }
 
 #rightPanel {
     flex: 1;
-    height: 100vh;
-    overflow-y: scroll;
     padding: 20px;
 }
 
